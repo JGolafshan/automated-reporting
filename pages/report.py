@@ -48,18 +48,18 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
         edited_df = st.data_editor(filtered_missed_df, num_rows="dynamic", use_container_width=True)
 
     st.divider()
+
     st.subheader("Expected Output")
-    st.warning("Visual this may different to the downloaded html due to style conflicts.")
+    st.warning("⚠️ Please note that the appearance may differ in the downloaded HTML file due to potential conflicts with existing styles.")
 
     html_output = HTMLReportGenerator()
     mm_table = html_output.create_table(edited_df, "Missed Mails")
-
     html_output.add_component(mm_table)
 
     # Output
     html_content = html_output.generate_html_report()
 
-    # Show it in Streamlit
+    # Render in Streamlit
     st.html(html_content)
 
     # Optionally let user download it

@@ -12,7 +12,8 @@ class HTMLReportGenerator:
         self.title = title
         self.components = []  # List to store all components like tables, charts, etc.
 
-    def create_tag(self, tag_name: str, classname: str, id_name: str, style: str, contents):
+    @staticmethod
+    def create_tag(tag_name: str, classname: str, id_name: str, style: str, contents):
         # Initialize the html_element with the required opening part
         html_element = f"<{tag_name}"
 
@@ -33,7 +34,8 @@ class HTMLReportGenerator:
 
         return html_element
 
-    def create_table(self, dataframe, table_id="table"):
+    @staticmethod
+    def create_table(dataframe, table_id="table"):
         """
         Creates an HTML table from a dataframe.
         """

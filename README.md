@@ -2,15 +2,16 @@
 - Update README:DONE
 
 # TODO
-- using pandas to filter data: DOING
+- Make tabs programming 
+- using pandas to filter data:
 - generate a report from the filtered data
-
+- custom filtering
 
 # 📊 Automated Reporting Tool
 
-A lightweight and interactive web app built with **Streamlit** to streamline the reporting process.  
+A lightweight interactive web app built with **Streamlit** to streamline the reporting process.  
 Easily upload datasets, explore the data, apply filters, and generate downloadable reports in HTML format.  
-Ideal for handling exception logs, missed meals, or any structured tabular data.
+Ideal for any structured tabular data.
 
 ### Live Demo
 [https://financial-instrument-dashboard.streamlit.app/](https://financial-instrument-dashboard.streamlit.app/)

@@ -18,7 +18,7 @@ col1, col2 = st.columns(2)
 
 # --- Exception File Upload ---
 with col1:
-    st.markdown("#### 1. Exception CSV")
+    st.markdown("#### 1. Exception - Data File")
     exception_file = st.file_uploader("Upload Exception CSV or Excel", type=["csv", "xls", "xlsx"], key="exception")
 
     if exception_file is None and "df_exception_file" in st.session_state:
@@ -30,7 +30,7 @@ with col1:
 
 # --- Missed Meals File Upload ---
 with col2:
-    st.markdown("#### 2. Missed Meals CSV")
+    st.markdown("#### 2. Missed Meals - Data File")
     missed_meals_file = st.file_uploader("Choose the Missed Meals file", type=["csv", "xls", "xlsx"],
                                          key="missed_meals")
 
@@ -38,8 +38,8 @@ with col2:
         missed_meals_file = st.session_state["df_missed_file"]
 
     read_missed_meals_data = read_file(missed_meals_file) if missed_meals_file else None
-    df_missed = handle_file_upload(read_missed_meals_data, missed_meals_file, session_key="df_missed",
-                                   label="Missed Meals File")
+    df_missed = handle_file_upload(read_missed_meals_data, missed_meals_file, session_key="df_missed", label="Missed Meals File")
+
 # --- Display Data and Submit ---
 if df_exception is not None and df_missed is not None:
     data_tabs = st.tabs([
@@ -61,4 +61,4 @@ if df_exception is not None and df_missed is not None:
         set_page_state("pages/report.py")
         st.switch_page("pages/report.py")
 else:
-    st.warning("⚠️ Please upload both files to continue.")
+    st.warning("❗ Please upload both files to continue.")
