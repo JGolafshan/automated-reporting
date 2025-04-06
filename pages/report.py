@@ -8,7 +8,8 @@
 
 import streamlit as st
 from src.core.data_export import HTMLReportGenerator
-from src.core.utils import set_page_state
+from src.core.utils import set_page_state, create_temp_html
+from subprocess import check_output
 
 
 def filter_exception_dataframe():
@@ -49,9 +50,6 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
 
     st.divider()
 
-    st.subheader("Expected Output")
-    st.warning("⚠️ Please note that the appearance may differ in the downloaded HTML file due to potential conflicts with existing styles.")
-
     html_output = HTMLReportGenerator()
     mm_table = html_output.create_table(edited_df, "Missed Mails")
     html_output.add_component(mm_table)
@@ -59,11 +57,26 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
     # Output
     html_content = html_output.generate_html_report()
 
-    # Render in Streamlit
-    st.html(html_content)
+    with st.expander("Preview HTML", expanded=False):
+        st.subheader("Expected Output")
+        st.warning("⚠️ Please note that the appearance may differ in the downloaded HTML file due to potential conflicts with existing styles.")
+
+        # Render in Streamlit
+        st.html(html_content)
+
+    st.divider()
 
     # Optionally let user download it
-    st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
+    cols = st.columns([0.12, 0.10, 0.10, 0.68])
+    with cols[0]:
+        st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
+
+    with cols[1]:
+        if st.button('Open HTML'):
+            check_output("start " + create_temp_html(html_content), shell=True)
+
+    with cols[2]:
+        st.download_button("Download PDF", data=html_content, file_name="report.pdf", mime="application/pdf")
 
 else:
     st.warning("❗ Please upload both files on the Report Generator page first.")
