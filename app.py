@@ -14,11 +14,10 @@ st.markdown(utils.load_css("assets/css/styles.css"), unsafe_allow_html=True)
 
 pages = [
     # st.Page("pages/home.py", title="Home", icon=":material/show_chart:"),
-    st.Page("pages/report_generator.py", title="Create Report", icon=":material/summarize:", url_path="/generate_report"),
+    st.Page("pages/report_generator.py", title="Create Report", icon=":material/summarize:",
+            url_path="/generate_report"),
     st.Page("pages/report.py", title="View Report", icon=":material/summarize:", url_path="report")
 ]
-
-
 
 pg = st.navigation(pages, expanded=True)
 sidebar.sidebar()
