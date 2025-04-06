@@ -8,6 +8,7 @@
 
 import pandas as pd
 import streamlit as st
+import tempfile
 
 
 def read_file(file, skip_rows=0):
@@ -22,6 +23,15 @@ def read_file(file, skip_rows=0):
     except Exception as e:
         st.error(f"Failed to read file: {e}")
         return None
+
+
+def create_temp_html(html_content):
+    # Create a temporary file to hold the HTML content
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as temp_html_file:
+        # Write HTML content to the file
+        temp_html_file.write(html_content.encode())
+        temp_html_file_path = temp_html_file.name
+    return temp_html_file_path
 
 
 def handle_file_upload(dataframe, filename, session_key: str, label: str):
@@ -55,6 +65,7 @@ def handle_file_upload(dataframe, filename, session_key: str, label: str):
         return st.session_state[session_key]
 
     return None
+
 
 def set_page_state(page: str):
     """Set the current page in session state and navigate if needed."""
