@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+    Date: 06/04/2024
+    Author: Joshua David Golafshan
+"""
+
+
 header_content = """
 <!doctype html>
 <html lang="en">
