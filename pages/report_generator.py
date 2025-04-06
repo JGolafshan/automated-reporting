@@ -31,8 +31,7 @@ with col1:
 # --- Missed Meals File Upload ---
 with col2:
     st.markdown("#### 2. Missed Meals - Data File")
-    missed_meals_file = st.file_uploader("Choose the Missed Meals file", type=["csv", "xls", "xlsx"],
-                                         key="missed_meals")
+    missed_meals_file = st.file_uploader("Choose the Missed Meals file", type=["csv", "xls", "xlsx"], key="missed_meals")
 
     if missed_meals_file is None and "df_missed_file" in st.session_state:
         missed_meals_file = st.session_state["df_missed_file"]
