@@ -48,14 +48,14 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
 
     st.divider()
 
+    html_content = ""
+
+    # Show it in Streamlit
+    st.html(html_content)
+
+    # Optionally let user download it
+    st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
+
 else:
     st.warning("❗ Please upload both files on the Report Generator page first.")
 
-
-html_content = ""
-
-# Show it in Streamlit
-st.html(html_content)
-
-# Optionally let user download it
-st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
