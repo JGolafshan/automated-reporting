@@ -7,7 +7,7 @@
 """
 
 import streamlit as st
-from src.core.data_export import *
+from src.core.data_export import HTMLReportGenerator
 from src.core.utils import set_page_state
 
 
@@ -48,8 +48,16 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
         edited_df = st.data_editor(filtered_missed_df, num_rows="dynamic", use_container_width=True)
 
     st.divider()
+    st.subheader("Expected Output")
+    st.warning("Visual this may different to the downloaded html due to style conflicts.")
 
-    html_content = ""
+    html_output = HTMLReportGenerator()
+    mm_table = html_output.create_table(edited_df, "Missed Mails")
+
+    html_output.add_component(mm_table)
+
+    # Output
+    html_content = html_output.generate_html_report()
 
     # Show it in Streamlit
     st.html(html_content)
@@ -59,4 +67,3 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
 
 else:
     st.warning("❗ Please upload both files on the Report Generator page first.")
-
