@@ -29,8 +29,7 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     data_tabs = st.tabs([
         st.session_state.get('exception_filename', 'Exception Data'),
-        st.session_state.get('missed_filename', 'Missed Meals Data'),
-        "General Filters"
+        st.session_state.get('missed_filename', 'Missed Meals Data')
     ])
 
     with data_tabs[0]:
