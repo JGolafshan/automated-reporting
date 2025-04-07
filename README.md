@@ -1,7 +1,7 @@
 # 📊 Automated Reporting Tool
 
 A lightweight interactive web app built with **Streamlit** to streamline the reporting process.  
-Easily upload datasets, explore the data, apply filters, and generate downloadable reports in HTML format.  
+Easily upload datasets, explore the data, and generate downloadable reports in HTML format.  
 Ideal for any structured tabular data.
 
 ### Live Demo
@@ -19,9 +19,6 @@ Ideal for any structured tabular data.
 
 - 💾 **Session Persistence**  
   Uploaded files are cached per session — switch between pages without losing your data.
-
-- 🔍 **Interactive Filtering**  
-  Filter uploaded datasets to focus on relevant information.
 
 - 📥 **Export Reports**  
   Download a **static HTML report** of the processed and filtered data — ready for sharing or archiving.
