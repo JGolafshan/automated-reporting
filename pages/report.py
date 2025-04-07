@@ -22,6 +22,15 @@ def filter_missing_meal_dataframe(dataframe):
         return df_filtered
 
 
+def finalised_mm_dataframe(filtered_missed_df):
+    # Filter rows where include is True
+    included_rows = filtered_missed_df[filtered_missed_df["include"] == True]
+
+    # Then select the specific columns you want
+    selected_columns = included_rows[["Empl ID", "Employee Name", "Shift Code", "Manager"]]
+    return selected_columns
+
+
 # Load Components
 set_page_state("pages/report.py")
 st.title("Generated Report")
@@ -47,11 +56,13 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
         filtered_missed_df = filter_missing_meal_dataframe(raw_df_missed)
         filtered_missed_df["include"] = True
         edited_df = st.data_editor(filtered_missed_df, num_rows="dynamic", use_container_width=True)
+        print(edited_df.columns)
 
     st.divider()
 
     html_output = HTMLReportGenerator()
-    mm_table = html_output.create_table(edited_df, "Missed Mails")
+    mm_table = html_output.create_table(finalised_mm_dataframe(edited_df), "Missed Mails")
+
     html_output.add_component(mm_table)
 
     # Output
@@ -59,7 +70,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
 
     with st.expander("Preview HTML", expanded=False):
         st.subheader("Expected Output")
-        st.warning("⚠️ Please note that the appearance may differ in the downloaded HTML file due to potential conflicts with existing styles.")
+        st.warning(
+            "⚠️ Please note that the appearance may differ in the downloaded HTML file due to potential conflicts with existing styles.")
 
         # Render in Streamlit
         st.html(html_content)
@@ -67,16 +79,13 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
     st.divider()
 
     # Optionally let user download it
-    cols = st.columns([0.12, 0.10, 0.10, 0.68])
+    cols = st.columns([0.12, 0.10, 0.78])
     with cols[0]:
         st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
 
     with cols[1]:
         if st.button('Open HTML'):
             check_output("start " + create_temp_html(html_content), shell=True)
-
-    with cols[2]:
-        st.download_button("Download PDF", data=html_content, file_name="report.pdf", mime="application/pdf")
 
 else:
     st.warning("❗ Please upload both files on the Report Generator page first.")
