@@ -81,5 +81,5 @@ def finalised_mm_dataframe(filtered_df):
     included_rows = filtered_df[filtered_df["include"] == True]
 
     # Then select the specific columns you want
-    selected_columns = included_rows[["Employee ID", "Employee Name", "Shift Type", "Manager"]]
+    selected_columns = included_rows[["include", "Employee ID", "Employee Name", "Manager", "Shift Type"]]
     return selected_columns

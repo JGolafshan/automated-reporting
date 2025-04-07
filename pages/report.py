@@ -5,6 +5,7 @@
     Date: 06/04/2024
     Author: Joshua David Golafshan
 """
+import datetime
 
 import streamlit as st
 from src.core.data_export import HTMLReportGenerator
@@ -39,7 +40,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
         filter_exception_df = filter_exception_dataframe(joined_exception_df)
         filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
 
-        st.dataframe(filter_exception_df, use_container_width=True)
+        final_exception_df = finalised_exception_dataframe(filter_exception_df)
+        st.dataframe(final_exception_df, use_container_width=True)
 
     with data_tabs[1]:
         st.subheader("Missed Meals Data")
@@ -48,42 +50,44 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
         filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
         filtered_missed_df["include"] = True
         filtered_missed_df = filtered_missed_df.sort_values(by="Manager")
+        final_dataframe = finalised_mm_dataframe(filtered_missed_df)
 
-        edited_df = st.data_editor(filtered_missed_df, num_rows="dynamic", use_container_width=True)
+        edited_df = st.data_editor(final_dataframe, num_rows="dynamic", use_container_width=True)
 
     st.divider()
 
     html_output = HTMLReportGenerator()
-    mm_table = html_output.create_table(finalised_mm_dataframe(edited_df), "Missed Mails")
+
+    final_df = edited_df[edited_df["include"] == True]
+    final_df = final_df[["Employee ID", "Employee Name", "Manager", "Shift Type"]]
+
+    mm_table = html_output.create_table(final_df, "Missed Mails")
 
     html_output.add_component(mm_table)
 
     counts = finalised_mm_dataframe(edited_df)["Shift Type"].value_counts()
     summary_str = f"Day - {counts.get('Day Shift', 0)}, Night - {counts.get('Night Shift', 0)}, Other - {counts.get('Other', 0)}"
     html_output.add_component(html_output.create_tag(
-                                tag_name="h4",
-                                classname="summary_stats",
-                                id_name="",
-                                style="",
-                                contents=summary_str)
-                              )
+        tag_name="h4",
+        classname="summary_stats",
+        id_name="",
+        style="",
+        contents=summary_str)
+    )
 
     html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
 
     exception_table = html_output.create_table(finalised_exception_dataframe(filter_exception_df), "Early In")
-
     html_output.add_component(exception_table)
-
     total_time = finalised_exception_dataframe(filter_exception_df)["Amount Exceptions"].sum()
     total_time_contents = f"Total Time: {total_time} Minutes"
     html_output.add_component(html_output.create_tag(
-                                tag_name="h4",
-                                classname="summary_stats",
-                                id_name="",
-                                style="",
-                                contents=total_time_contents)
-                              )
-
+        tag_name="h4",
+        classname="summary_stats",
+        id_name="",
+        style="",
+        contents=total_time_contents)
+    )
     html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
 
     # Output
@@ -102,7 +106,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     # Optionally let user download it
     cols = st.columns([0.12, 0.10, 0.78])
     with cols[0]:
-        st.download_button("Download HTML", data=html_content, file_name="report.html", mime="text/html")
+        st.download_button("Download HTML", data=html_content,
+                           file_name=f"report - {datetime.datetime.now().date()}.html", mime="text/html")
 
     with cols[1]:
         if st.button('Open HTML'):
