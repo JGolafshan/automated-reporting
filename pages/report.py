@@ -15,18 +15,31 @@ from subprocess import check_output
 file_name_roster = r"C:\Users\JGola\Desktop\Active_Roster_Detail_1743549472356"
 
 
-# def join_roster_df():
-#     merged_df = df_main.merge(
-#         df_lookup[["Emp User ID", "Supervisor Name", "Job Title", "Job Level"]],
-#         on="EMPLOYEEID",
-#         how="left"  # or "inner", depending on what you want
-#     )
-#     return
+# Roster DF: "Emp ID", "Supervisor Name", "Job Title", "Job Level"
+
+# Exception df:  EMPLOYEEID ....
+
+def join_roster_df(join, joinee):
+    df_merged = join.merge(
+        joinee[["Employee ID", "Supervisor Name", "Job Title", "Job Level"]],
+        on="Employee ID",
+        how="left"  # or "inner" depending on your use case
+    )
+    return df_merged
+
+
+def clean_roster_dataframe(dataframe):
+    dataframe.rename(
+        columns={'Emp ID': 'Employee ID'},
+        inplace=True)
+
+    dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
+    return dataframe
 
 
 def clean_exception_dataframe(dataframe):
     dataframe.rename(
-        columns={'PERSONFULLNAME': 'Full Name', 'EMPLOYEEID': 'Employee ID'},
+        columns={'PERSONFULLNAME': 'Full Name', 'PERSONNUM': 'Employee ID'},
         inplace=True)
     dataframe = dataframe.dropna(how='all')
     dataframe = dataframe[:-2]
@@ -44,7 +57,9 @@ def filter_exception_dataframe(dataframe):
 
 
 def finalised_exception_dataframe(filtered_df):
-    selected_columns = filtered_df[["Employee ID", "Full Name", "Actual", "Scheduled", "Amount Exceptions"]]
+    selected_columns = filtered_df[
+        ["Employee ID", "Full Name", "Supervisor Name", "Job Title", "Job Level", "Actual", "Scheduled",
+         "Amount Exceptions"]]
     return selected_columns
 
 
@@ -75,8 +90,11 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
     st.info("Review the filter data")
 
     # Load datasets
+    raw_df_roster = st.session_state.df_roster
     raw_df_exception = st.session_state.df_exception
     raw_df_missed = st.session_state.df_missed
+
+    cleaned_df_roster = clean_roster_dataframe(raw_df_roster)
 
     data_tabs = st.tabs([
         st.session_state.get('exception_filename', 'Exception Data'),
@@ -86,7 +104,9 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
     with data_tabs[0]:
         st.subheader("Exception Data")
         cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
-        filter_exception_df = filter_exception_dataframe(cleaned_exception_df)
+        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
+
+        filter_exception_df = filter_exception_dataframe(joined_exception_df)
         st.dataframe(filter_exception_df, use_container_width=True)
 
     with data_tabs[1]:
