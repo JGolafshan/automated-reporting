@@ -75,7 +75,7 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     html_output.add_component(exception_table)
 
     total_time = finalised_exception_dataframe(filter_exception_df)["Amount Exceptions"].sum()
-    total_time_contents = f"Total Time  - {total_time}"
+    total_time_contents = f"Total Time: {total_time} Minutes"
     html_output.add_component(html_output.create_tag(
                                 tag_name="h4",
                                 classname="summary_stats",

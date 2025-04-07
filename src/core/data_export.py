@@ -99,7 +99,7 @@ class HTMLReportGenerator:
                 margin-top: 2rem;
                 margin-bottom: 2rem;
                 margin-right: 1rem;
-                text-align: right;
+                text-align: center;
             }}
         </style>
         </head>

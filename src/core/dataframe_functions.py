@@ -30,7 +30,7 @@ def clean_roster_dataframe(dataframe):
 
 def clean_exception_dataframe(dataframe):
     dataframe.rename(
-        columns={'PERSONFULLNAME': 'Full Name', 'PERSONNUM': 'Employee ID'},
+        columns={'PERSONFULLNAME': 'Employee Name', 'PERSONNUM': 'Employee ID'},
         inplace=True)
     dataframe = dataframe.dropna(how='all')
     dataframe = dataframe[:-2]
@@ -49,7 +49,7 @@ def filter_exception_dataframe(dataframe):
 
 def finalised_exception_dataframe(filtered_df):
     selected_columns = filtered_df[
-        ["Employee ID", "Full Name", "Supervisor Name", "Job Title", "Job Level", "Actual", "Scheduled",
+        ["Employee ID", "Employee Name", "Supervisor Name", "Job Title", "Job Level", "Actual", "Scheduled",
          "Amount Exceptions"]]
     return selected_columns
 
