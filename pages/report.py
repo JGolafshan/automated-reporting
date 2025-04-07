@@ -15,6 +15,15 @@ from subprocess import check_output
 file_name_roster = r"C:\Users\JGola\Desktop\Active_Roster_Detail_1743549472356"
 
 
+# def join_roster_df():
+#     merged_df = df_main.merge(
+#         df_lookup[["Emp User ID", "Supervisor Name", "Job Title", "Job Level"]],
+#         on="EMPLOYEEID",
+#         how="left"  # or "inner", depending on what you want
+#     )
+#     return
+
+
 def clean_exception_dataframe(dataframe):
     dataframe.rename(
         columns={'PERSONFULLNAME': 'Full Name', 'EMPLOYEEID': 'Employee ID'},
