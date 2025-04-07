@@ -56,7 +56,7 @@ def finalised_exception_dataframe(filtered_df):
 
 def clean_missing_meal_dataframe(dataframe):
     dataframe.rename(
-        columns={'PERSONFULLNAME': 'Employee Name', 'Empl ID': 'Employee ID'},
+        columns={'PERSONFULLNAME': 'Employee Name', 'Empl ID': 'Employee ID', "Manager": "Supervisor Name"},
         inplace=True)
 
     conditions = [
@@ -81,5 +81,5 @@ def finalised_mm_dataframe(filtered_df):
     included_rows = filtered_df[filtered_df["include"] == True]
 
     # Then select the specific columns you want
-    selected_columns = included_rows[["include", "Employee ID", "Employee Name", "Manager", "Shift Type"]]
+    selected_columns = included_rows[["include", "Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]]
     return selected_columns

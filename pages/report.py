@@ -29,7 +29,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     data_tabs = st.tabs([
         st.session_state.get('exception_filename', 'Exception Data'),
-        st.session_state.get('missed_filename', 'Missed Meals Data')
+        st.session_state.get('missed_filename', 'Missed Meals Data'),
+        "General Filters"
     ])
 
     with data_tabs[0]:
@@ -40,8 +41,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
         filter_exception_df = filter_exception_dataframe(joined_exception_df)
         filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
 
-        final_exception_df = finalised_exception_dataframe(filter_exception_df)
-        st.dataframe(final_exception_df, use_container_width=True)
+        complete_exception_df = finalised_exception_dataframe(filter_exception_df)
+        exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
 
     with data_tabs[1]:
         st.subheader("Missed Meals Data")
@@ -49,23 +50,23 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
         filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
         filtered_missed_df["include"] = True
-        filtered_missed_df = filtered_missed_df.sort_values(by="Manager")
-        final_dataframe = finalised_mm_dataframe(filtered_missed_df)
+        filtered_missed_df = filtered_missed_df.sort_values(by="Supervisor Name")
+        complete_mm_df = finalised_mm_dataframe(filtered_missed_df)
 
-        edited_df = st.data_editor(final_dataframe, num_rows="dynamic", use_container_width=True)
+        mm_data_editor = st.data_editor(complete_mm_df, num_rows="dynamic", use_container_width=True)
 
     st.divider()
 
     html_output = HTMLReportGenerator()
 
-    final_df = edited_df[edited_df["include"] == True]
-    final_df = final_df[["Employee ID", "Employee Name", "Manager", "Shift Type"]]
+    final_df = mm_data_editor[mm_data_editor["include"] == True]
+    final_df = final_df[["Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]]
 
     mm_table = html_output.create_table(final_df, "Missed Mails")
 
     html_output.add_component(mm_table)
 
-    counts = finalised_mm_dataframe(edited_df)["Shift Type"].value_counts()
+    counts = finalised_mm_dataframe(mm_data_editor)["Shift Type"].value_counts()
     summary_str = f"Day - {counts.get('Day Shift', 0)}, Night - {counts.get('Night Shift', 0)}, Other - {counts.get('Other', 0)}"
     html_output.add_component(html_output.create_tag(
         tag_name="h4",
@@ -77,9 +78,9 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
 
-    exception_table = html_output.create_table(finalised_exception_dataframe(filter_exception_df), "Early In")
+    exception_table = html_output.create_table(exception_data_editor, "Early In")
     html_output.add_component(exception_table)
-    total_time = finalised_exception_dataframe(filter_exception_df)["Amount Exceptions"].sum()
+    total_time = finalised_exception_dataframe(exception_data_editor)["Amount Exceptions"].sum()
     total_time_contents = f"Total Time: {total_time} Minutes"
     html_output.add_component(html_output.create_tag(
         tag_name="h4",
