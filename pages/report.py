@@ -58,8 +58,33 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     html_output.add_component(mm_table)
 
+    counts = finalised_mm_dataframe(edited_df)["Shift Type"].value_counts()
+    summary_str = f"Day - {counts.get('Day Shift', 0)}, Night - {counts.get('Night Shift', 0)}, Other - {counts.get('Other', 0)}"
+    html_output.add_component(html_output.create_tag(
+                                tag_name="h4",
+                                classname="summary_stats",
+                                id_name="",
+                                style="",
+                                contents=summary_str)
+                              )
+
+    html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
+
     exception_table = html_output.create_table(finalised_exception_dataframe(filter_exception_df), "Early In")
+
     html_output.add_component(exception_table)
+
+    total_time = finalised_exception_dataframe(filter_exception_df)["Amount Exceptions"].sum()
+    total_time_contents = f"Total Time  - {total_time}"
+    html_output.add_component(html_output.create_tag(
+                                tag_name="h4",
+                                classname="summary_stats",
+                                id_name="",
+                                style="",
+                                contents=total_time_contents)
+                              )
+
+    html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
 
     # Output
     html_content = html_output.generate_html_report()

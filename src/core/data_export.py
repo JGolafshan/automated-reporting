@@ -95,10 +95,16 @@ class HTMLReportGenerator:
             .table td, .table th {{
                 padding: .15rem;
             }}
+            .summary_stats {{
+                margin-top: 2rem;
+                margin-bottom: 2rem;
+                margin-right: 1rem;
+                text-align: right;
+            }}
         </style>
         </head>
         <body>
-            <div class="container" style="{"{@media (min-width: 1200px) {.container {max-width: 1340px;}}"}">
+            <div class="container">
                 {"".join(self.components)}
             </div>
         <!-- Optional JavaScript -->
