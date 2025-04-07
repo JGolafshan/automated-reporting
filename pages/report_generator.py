@@ -19,19 +19,19 @@ col0, col1, col2 = st.columns(3)
 
 # --- Roster File Upload ---
 with col0:
-    st.markdown("#### 1. Roster - Data File")
+    st.markdown("#### Roster - Data File")
     roster_file = st.file_uploader("Upload Roster CSV or Excel", type=["csv", "xls", "xlsx"], key="roster")
 
     if roster_file is None and "df_roster_file" in st.session_state:
         roster_file = st.session_state["df_roster_file"]
 
     # Read and handle the file (with skiprows=3)
-    read_roster_data = read_file(roster_file, skip_rows=3) if roster_file else None
+    read_roster_data = read_file(roster_file, skip_rows=2) if roster_file else None
     df_roster = handle_file_upload(dataframe=read_roster_data, filename=roster_file, session_key="df_roster", label="Roster File")
 
 # --- Exception File Upload ---
 with col1:
-    st.markdown("#### 1. Exception - Data File")
+    st.markdown("#### Exception - Data File")
     exception_file = st.file_uploader("Upload Exception CSV or Excel", type=["csv", "xls", "xlsx"], key="exception")
 
     if exception_file is None and "df_exception_file" in st.session_state:
@@ -43,7 +43,7 @@ with col1:
 
 # --- Missed Meals File Upload ---
 with col2:
-    st.markdown("#### 2. Missed Meals - Data File")
+    st.markdown("#### Missed Meals - Data File")
     missed_meals_file = st.file_uploader("Choose the Missed Meals file", type=["csv", "xls", "xlsx"], key="missed_meals")
 
     if missed_meals_file is None and "df_missed_file" in st.session_state:
@@ -60,8 +60,8 @@ if df_exception is not None and df_missed is not None:
         st.session_state.get('missed_filename', 'Missed Meals Data')
     ])
 
-    with data_tabs[1]:
-        st.subheader("Exception Data")
+    with data_tabs[0]:
+        st.subheader("Roster Data")
         st.dataframe(df_roster, use_container_width=True)
 
     with data_tabs[1]:
