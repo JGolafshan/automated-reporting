@@ -1,11 +1,3 @@
-# Completed
-- Update README:DONE
-
-# TODO
-- using pandas to filter data:
-- generate a report from the filtered data
-- custom filtering
-
 # 📊 Automated Reporting Tool
 
 A lightweight interactive web app built with **Streamlit** to streamline the reporting process.  

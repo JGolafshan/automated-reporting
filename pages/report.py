@@ -6,87 +6,17 @@
     Author: Joshua David Golafshan
 """
 
-import pandas as pd
 import streamlit as st
 from src.core.data_export import HTMLReportGenerator
+from src.core.dataframe_functions import *
 from src.core.utils import set_page_state, create_temp_html
 from subprocess import check_output
-
-file_name_roster = r"C:\Users\JGola\Desktop\Active_Roster_Detail_1743549472356"
-
-
-# Roster DF: "Emp ID", "Supervisor Name", "Job Title", "Job Level"
-
-# Exception df:  EMPLOYEEID ....
-
-def join_roster_df(join, joinee):
-    df_merged = join.merge(
-        joinee[["Employee ID", "Supervisor Name", "Job Title", "Job Level"]],
-        on="Employee ID",
-        how="left"  # or "inner" depending on your use case
-    )
-    return df_merged
-
-
-def clean_roster_dataframe(dataframe):
-    dataframe.rename(
-        columns={'Emp ID': 'Employee ID'},
-        inplace=True)
-
-    dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
-    return dataframe
-
-
-def clean_exception_dataframe(dataframe):
-    dataframe.rename(
-        columns={'PERSONFULLNAME': 'Full Name', 'PERSONNUM': 'Employee ID'},
-        inplace=True)
-    dataframe = dataframe.dropna(how='all')
-    dataframe = dataframe[:-2]
-
-    dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
-    dataframe["Amount Exceptions"] = dataframe["Scheduled"] - dataframe["Actual"]
-    dataframe["Amount Exceptions"] = dataframe["Amount Exceptions"].dt.total_seconds() // 60
-    return dataframe
-
-
-def filter_exception_dataframe(dataframe):
-    dataframe = dataframe[dataframe["EXCEPTIONTYPE"] == "EARLY"]
-    dataframe = dataframe[dataframe["Amount Exceptions"] > 5]
-    return dataframe
-
-
-def finalised_exception_dataframe(filtered_df):
-    selected_columns = filtered_df[
-        ["Employee ID", "Full Name", "Supervisor Name", "Job Title", "Job Level", "Actual", "Scheduled",
-         "Amount Exceptions"]]
-    return selected_columns
-
-
-def clean_missing_meal_dataframe(dataframe):
-    pass
-
-
-def filter_missing_meal_dataframe(dataframe):
-    if dataframe is not None:
-        df_filtered = dataframe[dataframe["Missed"] > 0]
-        return df_filtered
-
-
-def finalised_mm_dataframe(filtered_df):
-    # Filter rows where include is True
-    included_rows = filtered_df[filtered_df["include"] == True]
-
-    # Then select the specific columns you want
-    selected_columns = included_rows[["Empl ID", "Employee Name", "Shift Code", "Manager"]]
-    return selected_columns
-
 
 # Load Components
 set_page_state("pages/report.py")
 st.title("Generated Report")
 
-if "df_exception" in st.session_state and "df_missed" in st.session_state:
+if "df_exception" in st.session_state and "df_missed" in st.session_state and "df_roster" in st.session_state:
     st.info("Review the filter data")
 
     # Load datasets
@@ -104,21 +34,28 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state:
     with data_tabs[0]:
         st.subheader("Exception Data")
         cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
-        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
 
+        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
         filter_exception_df = filter_exception_dataframe(joined_exception_df)
+        filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
+
         st.dataframe(filter_exception_df, use_container_width=True)
 
     with data_tabs[1]:
         st.subheader("Missed Meals Data")
-        filtered_missed_df = filter_missing_meal_dataframe(raw_df_missed)
+        cleaned_mm_df = clean_missing_meal_dataframe(raw_df_missed)
+
+        filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
         filtered_missed_df["include"] = True
+        filtered_missed_df = filtered_missed_df.sort_values(by="Manager")
+
         edited_df = st.data_editor(filtered_missed_df, num_rows="dynamic", use_container_width=True)
 
     st.divider()
 
     html_output = HTMLReportGenerator()
     mm_table = html_output.create_table(finalised_mm_dataframe(edited_df), "Missed Mails")
+
     html_output.add_component(mm_table)
 
     exception_table = html_output.create_table(finalised_exception_dataframe(filter_exception_df), "Early In")
