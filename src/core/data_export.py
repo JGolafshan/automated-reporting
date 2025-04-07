@@ -90,7 +90,7 @@ class HTMLReportGenerator:
         <title>{self.title}</title>
         </head>
         <body>
-            <div class="container">
+            <div class="container" style="{"{@media (min-width: 1200px) {.container {max-width: 1340px;}}"}">
                 {"".join(self.components)}
             </div>
         <!-- Optional JavaScript -->
