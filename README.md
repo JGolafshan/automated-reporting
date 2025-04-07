@@ -2,7 +2,6 @@
 - Update README:DONE
 
 # TODO
-- Make tabs programming 
 - using pandas to filter data:
 - generate a report from the filtered data
 - custom filtering
@@ -14,7 +13,7 @@ Easily upload datasets, explore the data, apply filters, and generate downloadab
 Ideal for any structured tabular data.
 
 ### Live Demo
-[https://financial-instrument-dashboard.streamlit.app/](https://financial-instrument-dashboard.streamlit.app/)
+[https://automated-reporting.streamlit.app/](https://automated-reporting.streamlit.app/)
 
 ---
 
