@@ -1,95 +1,131 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
     Date: 07/04/2024
     Author: Joshua David Golafshan
 """
-import datetime
 
+import datetime
 import numpy as np
 import pandas as pd
 import streamlit as st
 
 
-def join_roster_df(join, joinee):
-    df_merged = join.merge(
-        joinee[["Employee ID", "Supervisor Name", "Job Title", "Job Level"]],
-        on="Employee ID",
-        how="left"  # or "inner" depending on your use case
-    )
-    return df_merged
+# ---------------------------
+# Utility Functions
+# ---------------------------
+
+def safe_rename(df, rename_map):
+    return df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
 
-def clean_roster_dataframe(dataframe):
-    dataframe.rename(
-        columns={'Emp ID': 'Employee ID'},
-        inplace=True)
-
-    dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
-    return dataframe
+def safe_int_column(df, col):
+    df = df[pd.to_numeric(df[col], errors='coerce').notna()]
+    df[col] = df[col].astype(int)
+    return df
 
 
-def clean_exception_dataframe(dataframe):
-    dataframe.rename(
-        columns={'PERSONFULLNAME': 'Employee Name', 'PERSONNUM': 'Employee ID'},
-        inplace=True)
-    dataframe = dataframe.dropna(how='all')
-    dataframe = dataframe[:-2]
-
-    dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
-    dataframe["Amount Exceptions"] = dataframe["Scheduled"] - dataframe["Actual"]
-    return dataframe
+def format_timedelta_as_str(td):
+    if pd.isna(td):
+        return ""
+    total_seconds = td.total_seconds()
+    hours = int(total_seconds // 3600)
+    minutes = int((total_seconds % 3600) // 60)
+    return f"{hours:02}:{minutes:02}"
 
 
-def filter_exception_dataframe(dataframe):
-    dataframe = dataframe[dataframe["EXCEPTIONTYPE"] == "EARLY"]
+# ---------------------------
+# Data Cleaning Functions
+# ---------------------------
 
-    dataframe["Amount Exceptions"] = pd.to_timedelta(dataframe["Amount Exceptions"])
-    dataframe["total_minutes"] = dataframe["Amount Exceptions"].dt.total_seconds() / 60
-
-    cutoff = st.session_state.get("filter_min_exception_amount", 0)
-    if cutoff:
-        dataframe = dataframe[dataframe["total_minutes"] > cutoff]
-
-    dataframe["Amount Exceptions"] = dataframe["Amount Exceptions"].apply(lambda x: str(x).split(' ')[2][:5])
-
-    return dataframe
+def clean_roster_dataframe(df):
+    df = safe_rename(df, {'Emp ID': 'Employee ID'})
+    df = safe_int_column(df, "Employee ID")
+    return df
 
 
-def finalised_exception_dataframe(filtered_df):
-    selected_columns = filtered_df[
-        ["Employee ID", "Employee Name", "Supervisor Name", "Job Title", "Job Level", "Actual", "Scheduled",
-         "Amount Exceptions"]]
-    return selected_columns
+def clean_exception_dataframe(df):
+    df = safe_rename(df, {
+        'PERSONFULLNAME': 'Employee Name',
+        'PERSONNUM': 'Employee ID'
+    })
+    df = df.dropna(how='all')
+    if len(df) > 2:
+        df = df.iloc[:-2]
+    df = safe_int_column(df, "Employee ID")
+    df["Amount Exceptions"] = df["Scheduled"] - df["Actual"]
+    return df
 
 
-def clean_missing_meal_dataframe(dataframe):
-    dataframe.rename(
-        columns={'PERSONFULLNAME': 'Employee Name', 'Empl ID': 'Employee ID', "Manager": "Supervisor Name"},
-        inplace=True)
-
+def clean_missing_meal_dataframe(df):
+    df = safe_rename(df, {
+        'PERSONFULLNAME': 'Employee Name',
+        'Empl ID': 'Employee ID',
+        'Manager': 'Supervisor Name'
+    })
     conditions = [
-        dataframe["Shift Code"].str.startswith("N", na=False),
-        dataframe["Shift Code"].str.startswith("D", na=False)
+        df["Shift Code"].str.startswith("N", na=False),
+        df["Shift Code"].str.startswith("D", na=False)
     ]
-
     choices = ["Night Shift", "Day Shift"]
-
-    dataframe["Shift Type"] = np.select(conditions, choices, default="Other")
-    return dataframe
-
-
-def filter_missing_meal_dataframe(dataframe):
-    if dataframe is not None:
-        df_filtered = dataframe[dataframe["Missed"] > 0]
-        return df_filtered
+    df["Shift Type"] = np.select(conditions, choices, default="Other")
+    return df
 
 
-def finalised_mm_dataframe(filtered_df):
-    # Filter rows where include is True
-    included_rows = filtered_df[filtered_df["include"] == True]
+# ---------------------------
+# Filtering Functions
+# ---------------------------
 
-    # Then select the specific columns you want
-    selected_columns = included_rows[["include", "Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]]
-    return selected_columns
+def filter_exception_dataframe(df, exception_type="EARLY", session_key="filter_min_exception_amount"):
+    df = df[df["EXCEPTIONTYPE"] == exception_type].copy()
+    df["Amount Exceptions"] = pd.to_timedelta(df["Amount Exceptions"], errors="coerce")
+    df = df[df["Amount Exceptions"].notna()]
+    df["total_minutes"] = df["Amount Exceptions"].dt.total_seconds() / 60
+
+    cutoff = st.session_state.get(session_key, 0)
+    if cutoff:
+        df = df[df["total_minutes"] > cutoff]
+
+    df["Amount Exceptions"] = df["Amount Exceptions"].apply(format_timedelta_as_str)
+    return df
+
+
+def filter_missing_meal_dataframe(df):
+    if df is not None and "Missed" in df.columns:
+        return df[df["Missed"] > 0]
+    return df
+
+
+# ---------------------------
+# Final Output Selection
+# ---------------------------
+
+def finalised_exception_dataframe(df):
+    if "include" not in df.columns:
+        return pd.DataFrame()
+    df = df[df["include"] == True]
+    cols = [
+        "include", "Employee ID", "Employee Name", "Supervisor Name",
+        "Job Title", "Job Level", "Actual", "Scheduled", "Amount Exceptions"
+    ]
+    return df[cols].copy()
+
+
+def finalised_mm_dataframe(df):
+    if "include" not in df.columns:
+        return pd.DataFrame()
+    df = df[df["include"] == True]
+    cols = ["include", "Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]
+    return df[cols].copy()
+
+
+# ---------------------------
+# Join Helper
+# ---------------------------
+
+def join_roster_df(left, roster):
+    return left.merge(
+        roster[["Employee ID", "Supervisor Name", "Job Title", "Job Level"]],
+        on="Employee ID",
+        how="left"
+    )

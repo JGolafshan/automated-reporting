@@ -40,8 +40,8 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
             joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
             filter_exception_df = filter_exception_dataframe(joined_exception_df)
+            filter_exception_df["include"] = True
             filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
-
             complete_exception_df = finalised_exception_dataframe(filter_exception_df)
             exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
 
@@ -67,10 +67,10 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     html_output = HTMLReportGenerator()
 
-    final_df = mm_data_editor[mm_data_editor["include"] == True]
-    final_df = final_df[["Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]]
+    final_mm_df = mm_data_editor[mm_data_editor["include"] == True]
+    final_mm_df = final_mm_df[["Employee ID", "Employee Name", "Supervisor Name", "Shift Type"]]
 
-    mm_table = html_output.create_table(final_df, "Missed Mails")
+    mm_table = html_output.create_table(final_mm_df, "Missed Mails")
 
     html_output.add_component(mm_table)
 
@@ -86,7 +86,13 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     html_output.add_component(html_output.create_tag("hr", "", "", "", ""))
 
-    exception_table = html_output.create_table(exception_data_editor, "Early In")
+    final_exception_df = exception_data_editor[exception_data_editor["include"] == True]
+    final_exception_df = final_exception_df[[
+        "Employee ID", "Employee Name", "Supervisor Name",
+        "Job Title", "Job Level", "Actual", "Scheduled", "Amount Exceptions"
+    ]]
+
+    exception_table = html_output.create_table(final_exception_df, "Early In")
     html_output.add_component(exception_table)
     final_exeception_df = finalised_exception_dataframe(exception_data_editor)
 
