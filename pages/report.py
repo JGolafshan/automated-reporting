@@ -33,30 +33,30 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     ])
 
     with data_tabs[0]:
-        table_data, filter_data = st.columns([9,2])
-        with table_data:
-            st.subheader("Exception Data")
-            cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
+        st.subheader("Exception Data")
+        cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
 
-            joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
-            filter_exception_df = filter_exception_dataframe(joined_exception_df)
-            filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
+        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
+        filter_exception_df = filter_exception_dataframe(joined_exception_df)
+        filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
 
-            complete_exception_df = finalised_exception_dataframe(filter_exception_df)
-            exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
-        with filter_data:
-            st.write("ss")
+        complete_exception_df = finalised_exception_dataframe(filter_exception_df)
+        exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
+
 
     with data_tabs[1]:
-        st.subheader("Missed Meals Data")
-        cleaned_mm_df = clean_missing_meal_dataframe(raw_df_missed)
+        table_data, filter_data = st.columns([9, 2])
+        with table_data:
+            st.subheader("Missed Meals Data")
+            cleaned_mm_df = clean_missing_meal_dataframe(raw_df_missed)
 
-        filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
-        filtered_missed_df["include"] = True
-        filtered_missed_df = filtered_missed_df.sort_values(by="Supervisor Name")
-        complete_mm_df = finalised_mm_dataframe(filtered_missed_df)
-
-        mm_data_editor = st.data_editor(complete_mm_df, num_rows="dynamic", use_container_width=True)
+            filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
+            filtered_missed_df["include"] = True
+            filtered_missed_df = filtered_missed_df.sort_values(by="Supervisor Name")
+            complete_mm_df = finalised_mm_dataframe(filtered_missed_df)
+            mm_data_editor = st.data_editor(complete_mm_df, num_rows="dynamic", use_container_width=True)
+        with filter_data:
+            st.write("ss")
 
     st.divider()
 
