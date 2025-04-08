@@ -33,15 +33,19 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     ])
 
     with data_tabs[0]:
-        st.subheader("Exception Data")
-        cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
+        table_data, filter_data = st.columns([9,2])
+        with table_data:
+            st.subheader("Exception Data")
+            cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
 
-        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
-        filter_exception_df = filter_exception_dataframe(joined_exception_df)
-        filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
+            joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
+            filter_exception_df = filter_exception_dataframe(joined_exception_df)
+            filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
 
-        complete_exception_df = finalised_exception_dataframe(filter_exception_df)
-        exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
+            complete_exception_df = finalised_exception_dataframe(filter_exception_df)
+            exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
+        with filter_data:
+            st.write("ss")
 
     with data_tabs[1]:
         st.subheader("Missed Meals Data")
@@ -79,8 +83,18 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
 
     exception_table = html_output.create_table(exception_data_editor, "Early In")
     html_output.add_component(exception_table)
-    total_time = finalised_exception_dataframe(exception_data_editor)["Amount Exceptions"].sum()
-    total_time_contents = f"Total Time: {total_time} Minutes"
+    final_exeception_df = finalised_exception_dataframe(exception_data_editor)
+
+
+    copy = final_exeception_df.copy()
+    copy["Amount Exceptions"] = final_exeception_df["Amount Exceptions"] + ":00"
+    copy["Amount Exceptions"] = pd.to_timedelta(copy["Amount Exceptions"])
+    total_time = copy["Amount Exceptions"].sum()
+    total_minutes = total_time.total_seconds() // 60
+
+
+
+    total_time_contents = f"Total Time: {total_minutes} Minutes"
     html_output.add_component(html_output.create_tag(
         tag_name="h4",
         classname="summary_stats",

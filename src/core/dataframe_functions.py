@@ -5,6 +5,7 @@
     Date: 07/04/2024
     Author: Joshua David Golafshan
 """
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -37,13 +38,19 @@ def clean_exception_dataframe(dataframe):
 
     dataframe["Employee ID"] = dataframe["Employee ID"].astype(int)
     dataframe["Amount Exceptions"] = dataframe["Scheduled"] - dataframe["Actual"]
-    dataframe["Amount Exceptions"] = dataframe["Amount Exceptions"].dt.total_seconds() // 60
     return dataframe
 
 
 def filter_exception_dataframe(dataframe):
     dataframe = dataframe[dataframe["EXCEPTIONTYPE"] == "EARLY"]
-    dataframe = dataframe[dataframe["Amount Exceptions"] > 5]
+
+    dataframe["Amount Exceptions"] = pd.to_timedelta(dataframe["Amount Exceptions"])
+    dataframe["total_minutes"] = dataframe["Amount Exceptions"].dt.total_seconds() / 60
+    cutoff_minutes = 5
+
+    dataframe = dataframe[dataframe["total_minutes"] > cutoff_minutes]
+    dataframe["Amount Exceptions"] = dataframe["Amount Exceptions"].apply(lambda x: str(x).split(' ')[2][:5])
+
     return dataframe
 
 
