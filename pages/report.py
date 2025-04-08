@@ -33,30 +33,35 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     ])
 
     with data_tabs[0]:
-        st.subheader("Exception Data")
-        cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
-
-        joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
-        filter_exception_df = filter_exception_dataframe(joined_exception_df)
-        filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
-
-        complete_exception_df = finalised_exception_dataframe(filter_exception_df)
-        exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
-
-
-    with data_tabs[1]:
         table_data, filter_data = st.columns([9, 2])
         with table_data:
-            st.subheader("Missed Meals Data")
-            cleaned_mm_df = clean_missing_meal_dataframe(raw_df_missed)
+            st.subheader("Exception Data")
+            cleaned_exception_df = clean_exception_dataframe(raw_df_exception)
 
-            filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
-            filtered_missed_df["include"] = True
-            filtered_missed_df = filtered_missed_df.sort_values(by="Supervisor Name")
-            complete_mm_df = finalised_mm_dataframe(filtered_missed_df)
-            mm_data_editor = st.data_editor(complete_mm_df, num_rows="dynamic", use_container_width=True)
+            joined_exception_df = join_roster_df(cleaned_exception_df, cleaned_df_roster)
+            filter_exception_df = filter_exception_dataframe(joined_exception_df)
+            filter_exception_df = filter_exception_df.sort_values(by="Supervisor Name")
+
+            complete_exception_df = finalised_exception_dataframe(filter_exception_df)
+            exception_data_editor = st.data_editor(complete_exception_df, num_rows="dynamic", use_container_width=True)
+
         with filter_data:
-            st.write("ss")
+            st.subheader("Filter Options")
+            if st.button("Clear All Filters"):
+                st.session_state["filter_min_exception_amount"] = 0
+
+            x = st.number_input("Minimum Exception Amount", key="filter_min_exception_amount")
+
+    with data_tabs[1]:
+        st.subheader("Missed Meals Data")
+        cleaned_mm_df = clean_missing_meal_dataframe(raw_df_missed)
+
+        filtered_missed_df = filter_missing_meal_dataframe(cleaned_mm_df)
+        filtered_missed_df["include"] = True
+        filtered_missed_df = filtered_missed_df.sort_values(by="Supervisor Name")
+        complete_mm_df = finalised_mm_dataframe(filtered_missed_df)
+
+        mm_data_editor = st.data_editor(complete_mm_df, num_rows="dynamic", use_container_width=True)
 
     st.divider()
 
@@ -85,14 +90,12 @@ if "df_exception" in st.session_state and "df_missed" in st.session_state and "d
     html_output.add_component(exception_table)
     final_exeception_df = finalised_exception_dataframe(exception_data_editor)
 
-
     copy = final_exeception_df.copy()
-    copy["Amount Exceptions"] = final_exeception_df["Amount Exceptions"] + ":00"
-    copy["Amount Exceptions"] = pd.to_timedelta(copy["Amount Exceptions"])
+    copy["Amount Exceptions"] = copy["Amount Exceptions"].astype(str) + ":00"
+    copy["Amount Exceptions"] = pd.to_timedelta(copy["Amount Exceptions"], errors='coerce')
+    copy = copy.dropna(subset=["Amount Exceptions"])
     total_time = copy["Amount Exceptions"].sum()
     total_minutes = total_time.total_seconds() // 60
-
-
 
     total_time_contents = f"Total Time: {total_minutes} Minutes"
     html_output.add_component(html_output.create_tag(

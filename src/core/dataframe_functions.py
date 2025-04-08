@@ -9,6 +9,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 
 
 def join_roster_df(join, joinee):
@@ -46,9 +47,11 @@ def filter_exception_dataframe(dataframe):
 
     dataframe["Amount Exceptions"] = pd.to_timedelta(dataframe["Amount Exceptions"])
     dataframe["total_minutes"] = dataframe["Amount Exceptions"].dt.total_seconds() / 60
-    cutoff_minutes = 5
 
-    dataframe = dataframe[dataframe["total_minutes"] > cutoff_minutes]
+    cutoff = st.session_state.get("filter_min_exception_amount", 0)
+    if cutoff:
+        dataframe = dataframe[dataframe["total_minutes"] > cutoff]
+
     dataframe["Amount Exceptions"] = dataframe["Amount Exceptions"].apply(lambda x: str(x).split(' ')[2][:5])
 
     return dataframe
